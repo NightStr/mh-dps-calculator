@@ -1,0 +1,18 @@
+[package]
+name = "dps-calculator"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rust_decimal = "1.17"
+rust_decimal_macros = "1.17"
+
+[lib]
+name = "dps_calculator"
+path = "dps-calculator/src/lib.rs"
+
+[[bin]]
+name = "dps_calculator"
+path = "main.rs"
