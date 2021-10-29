@@ -3,7 +3,7 @@ fn main() {
         100,
         dps_calculator::Sharpness::White,
         100,
-        dps_calculator::ElementalResistance::ThreeStar
+        dps_calculator::Resistance::ThreeStar
     );
     println!("{}", damage);
 }
