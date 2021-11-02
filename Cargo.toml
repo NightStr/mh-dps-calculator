@@ -14,3 +14,8 @@ path = "dps-calculator/src/lib.rs"
 [[bin]]
 name = "dps_calculator"
 path = "main.rs"
+
+[profile.release]
+opt-level = 'z'     # Optimize for size.
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
