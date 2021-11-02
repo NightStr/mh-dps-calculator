@@ -44,11 +44,11 @@ pub enum Resistance {
     Custom(f32),
 }
 
-pub struct RawResistance {
-    resistance: Resistance
+pub struct RawVulnerability {
+    pub resistance: Resistance
 }
 
-impl RawResistance {
+impl RawVulnerability {
     pub fn get_multiplicity(&self) -> f32 {
         match &self.resistance {
             Resistance::OneStar => 0.275,
@@ -59,11 +59,11 @@ impl RawResistance {
     }
 }
 
-pub struct ElementalResistance  {
-    resistance: Resistance
+pub struct ElementalVulnerability {
+    pub resistance: Resistance
 }
 
-impl ElementalResistance {
+impl ElementalVulnerability {
     pub fn get_multiplicity(&self) -> f32 {
         match &self.resistance {
             Resistance::OneStar => 0.125,
@@ -92,29 +92,33 @@ impl Display for CalculatedDamage {
 }
 
 pub fn calculate(
-    weapon_damage: u16, sharpness: Sharpness, raw_resist: RawResistance, elemental_damage: u16,
-    elemental_resist: ElementalResistance
+    weapon_damage: u16, sharpness: Sharpness, affinity: u16, affinity_size: u16,
+    raw_vulnerability: RawVulnerability, elemental_damage: u16,
+    elemental_vulnerability: ElementalVulnerability
 ) -> CalculatedDamage {
+    let raw: u16 = (f32::from(weapon_damage) * sharpness.get_raw_multiplicity()
+            * raw_vulnerability.get_multiplicity()) as u16;
     CalculatedDamage {
-        raw: (f32::from(weapon_damage) * sharpness.get_raw_multiplicity()
-            * raw_resist.get_multiplicity()) as u16,
+        raw: raw + (raw /100*affinity_size)/100*affinity,
         elemental: (f32::from(elemental_damage / 10) * sharpness.get_elemental_multiplicity()
-            * elemental_resist.get_multiplicity()) as u16
+            * elemental_vulnerability.get_multiplicity()) as u16
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{calculate, CalculatedDamage, ElementalResistance, RawResistance, Resistance, Sharpness};
+    use crate::{calculate, CalculatedDamage, ElementalVulnerability, RawVulnerability, Resistance, Sharpness};
 
     #[test]
     fn test_calculate() {
         assert_eq!(calculate(
             100,
             Sharpness::White,
-            RawResistance{resistance: Resistance::OneStar},
+            0,
+            25,
+            RawVulnerability {resistance: Resistance::ThreeStar},
             100,
-            ElementalResistance{resistance: Resistance::OneStar}
-        ), CalculatedDamage{raw: 132, elemental: 3});
+            ElementalVulnerability {resistance: Resistance::ThreeStar}
+        ), CalculatedDamage{raw: 92, elemental: 3});
     }
 }
