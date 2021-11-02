@@ -37,7 +37,7 @@ macro_rules! ask_resistance {
                     }
                 }
             }
-        }
+        }.into()
     }}
 }
 
@@ -68,9 +68,9 @@ fn main() {
             ask_sharpness!("Уровень заточки"),
             ask!("Шанс крита: "),
             ask!("Размер крита: "),
-            dps_calculator::RawVulnerability { resistance: ask_resistance!("Уязвимость к физики") },
+            ask_resistance!("Уязвимость к физики"),
             ask!("Урон стихии: "),
-            dps_calculator::ElementalVulnerability { resistance: ask_resistance!("Уязвимость к стихии") },
+            ask_resistance!("Уязвимость к стихии"),
         );
         println!("{}", damage);
     };

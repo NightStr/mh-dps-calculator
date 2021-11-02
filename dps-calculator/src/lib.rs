@@ -59,6 +59,18 @@ impl RawVulnerability {
     }
 }
 
+impl From<Resistance> for RawVulnerability {
+    fn from(resistance: Resistance) -> Self {
+        Self{resistance}
+    }
+}
+
+impl From<f32> for RawVulnerability {
+    fn from(v: f32) -> Self {
+        Self{resistance: Resistance::Custom(v)}
+    }
+}
+
 pub struct ElementalVulnerability {
     pub resistance: Resistance
 }
@@ -71,6 +83,19 @@ impl ElementalVulnerability {
             Resistance::ThreeStar => 0.275,
             Resistance::Custom(v) => *v,
         }
+    }
+}
+
+
+impl From<Resistance> for ElementalVulnerability {
+    fn from(resistance: Resistance) -> Self {
+        Self{resistance}
+    }
+}
+
+impl From<f32> for ElementalVulnerability {
+    fn from(v: f32) -> Self {
+        Self{resistance: Resistance::Custom(v)}
     }
 }
 
@@ -116,9 +141,9 @@ mod tests {
             Sharpness::White,
             0,
             25,
-            RawVulnerability {resistance: Resistance::ThreeStar},
+            Resistance::ThreeStar.into(),
             100,
-            ElementalVulnerability {resistance: Resistance::ThreeStar}
+            Resistance::ThreeStar.into()
         ), CalculatedDamage{raw: 92, elemental: 3});
     }
 }
