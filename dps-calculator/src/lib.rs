@@ -56,37 +56,56 @@ impl TryFrom<u16> for Sharpness {
     }
 }
 
-pub enum Resistance {
+pub enum ulnerability {
     OneStar,
     TwoStar,
     ThreeStar,
     Custom(f32),
 }
 
-pub struct RawVulnerability {
-    pub resistance: Resistance
-}
-
-impl RawVulnerability {
-    pub fn get_multiplicity(&self) -> f32 {
-        match &self.resistance {
-            Resistance::OneStar => 0.275,
-            Resistance::TwoStar => 0.6,
-            Resistance::ThreeStar => 0.7,
-            Resistance::Custom(v) => *v,
+impl TryFrom<u16> for ulnerability {
+    type Error = & 'static str;
+    fn try_from(v: u16) -> Result< Self, Self::Error> {
+        match v {
+            1 => Ok(ulnerability::OneStar),
+            2 => Ok(ulnerability::TwoStar),
+            3 => Ok(ulnerability::ThreeStar),
+            v => {
+                match format ! ("0.{}", v).parse::< f32 > () {
+                    Ok(x) => Ok(ulnerability::Custom(x)),
+                    Err(_) => {
+                        Err("Некорректное значение. Попробуйте еще раз")
+                    }
+                }
+            }
         }
     }
 }
 
-impl From<Resistance> for RawVulnerability {
-    fn from(resistance: Resistance) -> Self {
-        Self{resistance}
+pub struct RawVulnerability {
+    pub vulnerability: ulnerability
+}
+
+impl RawVulnerability {
+    pub fn get_multiplicity(&self) -> f32 {
+        match &self.vulnerability {
+            ulnerability::OneStar => 0.275,
+            ulnerability::TwoStar => 0.6,
+            ulnerability::ThreeStar => 0.7,
+            ulnerability::Custom(v) => *v,
+        }
+    }
+}
+
+impl From<ulnerability> for RawVulnerability {
+    fn from(resistance: ulnerability) -> Self {
+        Self{ vulnerability: resistance }
     }
 }
 
 impl From<f32> for RawVulnerability {
     fn from(v: f32) -> Self {
-        Self{resistance: Resistance::Custom(v)}
+        Self{ vulnerability: ulnerability::Custom(v)}
     }
 }
 
@@ -94,47 +113,38 @@ impl TryFrom<u16> for RawVulnerability {
     type Error = &'static str;
 
     fn try_from(v: u16) -> Result<Self, Self::Error> {
-        match v {
-            1 => Ok(Self{ resistance: Resistance::OneStar }),
-            2 => Ok(Self{ resistance: Resistance::TwoStar }),
-            3 => Ok(Self{ resistance: Resistance::ThreeStar }),
-            v => {
-                match format!("0.{}", v).parse::<f32>() {
-                    Ok(x) => Ok(Self{ resistance: Resistance::Custom(x) }),
-                    Err(_) => {
-                        Err("Некорректное значение. Попробуйте еще раз")
-                    }
-                }
-            }
+        match ulnerability::try_from(v) {
+            Ok(resistance) => Ok(Self{ vulnerability: resistance }),
+            Err(e) => Err(e)
         }
     }
 }
 
 pub struct ElementalVulnerability {
-    pub resistance: Resistance
+    pub resistance: ulnerability
 }
 
 impl ElementalVulnerability {
     pub fn get_multiplicity(&self) -> f32 {
         match &self.resistance {
-            Resistance::OneStar => 0.125,
-            Resistance::TwoStar => 0.175,
-            Resistance::ThreeStar => 0.275,
-            Resistance::Custom(v) => *v,
+            ulnerability::OneStar => 0.125,
+            ulnerability::TwoStar => 0.175,
+            ulnerability::ThreeStar => 0.275,
+            ulnerability::Custom(v) => *v,
         }
     }
 }
 
 
-impl From<Resistance> for ElementalVulnerability {
-    fn from(resistance: Resistance) -> Self {
+impl From<ulnerability> for ElementalVulnerability {
+    fn from(resistance: ulnerability) -> Self {
         Self{resistance}
     }
 }
 
 impl From<f32> for ElementalVulnerability {
     fn from(v: f32) -> Self {
-        Self{resistance: Resistance::Custom(v)}
+        Self{resistance: ulnerability::Custom(v)}
     }
 }
 
@@ -142,18 +152,9 @@ impl TryFrom<u16> for ElementalVulnerability {
     type Error = &'static str;
 
     fn try_from(v: u16) -> Result<Self, Self::Error> {
-        match v {
-            1 => Ok(Self{ resistance: Resistance::OneStar }),
-            2 => Ok(Self{ resistance: Resistance::TwoStar }),
-            3 => Ok(Self{ resistance: Resistance::ThreeStar }),
-            v => {
-                match format!("0.{}", v).parse::<f32>() {
-                    Ok(x) => Result::Ok(Self{ resistance: Resistance::Custom(x) }),
-                    Err(_) => {
-                        Err("Некорректное значение. Попробуйте еще раз")
-                    }
-                }
-            }
+        match ulnerability::try_from(v) {
+            Ok(resistance) => Ok(Self{resistance}),
+            Err(e) => Err(e)
         }
     }
 }
@@ -190,7 +191,7 @@ pub fn calculate(
 
 #[cfg(test)]
 mod tests {
-    use crate::{calculate, CalculatedDamage, ElementalVulnerability, RawVulnerability, Resistance, Sharpness};
+    use crate::{calculate, CalculatedDamage, ElementalVulnerability, RawVulnerability, ulnerability, Sharpness};
 
     #[test]
     fn test_calculate() {
@@ -199,9 +200,9 @@ mod tests {
             Sharpness::White,
             0,
             25,
-            Resistance::ThreeStar.into(),
+            ulnerability::ThreeStar.into(),
             100,
-            Resistance::ThreeStar.into()
+            ulnerability::ThreeStar.into()
         ), CalculatedDamage{raw: 92, elemental: 3});
     }
 }
