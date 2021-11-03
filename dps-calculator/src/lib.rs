@@ -56,23 +56,23 @@ impl TryFrom<u16> for Sharpness {
     }
 }
 
-pub enum ulnerability {
+pub enum Vulnerability {
     OneStar,
     TwoStar,
     ThreeStar,
     Custom(f32),
 }
 
-impl TryFrom<u16> for ulnerability {
+impl TryFrom<u16> for Vulnerability {
     type Error = & 'static str;
     fn try_from(v: u16) -> Result< Self, Self::Error> {
         match v {
-            1 => Ok(ulnerability::OneStar),
-            2 => Ok(ulnerability::TwoStar),
-            3 => Ok(ulnerability::ThreeStar),
+            1 => Ok(Vulnerability::OneStar),
+            2 => Ok(Vulnerability::TwoStar),
+            3 => Ok(Vulnerability::ThreeStar),
             v => {
                 match format ! ("0.{}", v).parse::< f32 > () {
-                    Ok(x) => Ok(ulnerability::Custom(x)),
+                    Ok(x) => Ok(Vulnerability::Custom(x)),
                     Err(_) => {
                         Err("Некорректное значение. Попробуйте еще раз")
                     }
@@ -83,29 +83,29 @@ impl TryFrom<u16> for ulnerability {
 }
 
 pub struct RawVulnerability {
-    pub vulnerability: ulnerability
+    pub vulnerability: Vulnerability
 }
 
 impl RawVulnerability {
     pub fn get_multiplicity(&self) -> f32 {
         match &self.vulnerability {
-            ulnerability::OneStar => 0.275,
-            ulnerability::TwoStar => 0.6,
-            ulnerability::ThreeStar => 0.7,
-            ulnerability::Custom(v) => *v,
+            Vulnerability::OneStar => 0.275,
+            Vulnerability::TwoStar => 0.6,
+            Vulnerability::ThreeStar => 0.7,
+            Vulnerability::Custom(v) => *v,
         }
     }
 }
 
-impl From<ulnerability> for RawVulnerability {
-    fn from(resistance: ulnerability) -> Self {
+impl From<Vulnerability> for RawVulnerability {
+    fn from(resistance: Vulnerability) -> Self {
         Self{ vulnerability: resistance }
     }
 }
 
 impl From<f32> for RawVulnerability {
     fn from(v: f32) -> Self {
-        Self{ vulnerability: ulnerability::Custom(v)}
+        Self{ vulnerability: Vulnerability::Custom(v)}
     }
 }
 
@@ -113,7 +113,7 @@ impl TryFrom<u16> for RawVulnerability {
     type Error = &'static str;
 
     fn try_from(v: u16) -> Result<Self, Self::Error> {
-        match ulnerability::try_from(v) {
+        match Vulnerability::try_from(v) {
             Ok(resistance) => Ok(Self{ vulnerability: resistance }),
             Err(e) => Err(e)
         }
@@ -121,30 +121,30 @@ impl TryFrom<u16> for RawVulnerability {
 }
 
 pub struct ElementalVulnerability {
-    pub resistance: ulnerability
+    pub resistance: Vulnerability
 }
 
 impl ElementalVulnerability {
     pub fn get_multiplicity(&self) -> f32 {
         match &self.resistance {
-            ulnerability::OneStar => 0.125,
-            ulnerability::TwoStar => 0.175,
-            ulnerability::ThreeStar => 0.275,
-            ulnerability::Custom(v) => *v,
+            Vulnerability::OneStar => 0.125,
+            Vulnerability::TwoStar => 0.175,
+            Vulnerability::ThreeStar => 0.275,
+            Vulnerability::Custom(v) => *v,
         }
     }
 }
 
 
-impl From<ulnerability> for ElementalVulnerability {
-    fn from(resistance: ulnerability) -> Self {
+impl From<Vulnerability> for ElementalVulnerability {
+    fn from(resistance: Vulnerability) -> Self {
         Self{resistance}
     }
 }
 
 impl From<f32> for ElementalVulnerability {
     fn from(v: f32) -> Self {
-        Self{resistance: ulnerability::Custom(v)}
+        Self{resistance: Vulnerability::Custom(v)}
     }
 }
 
@@ -152,7 +152,7 @@ impl TryFrom<u16> for ElementalVulnerability {
     type Error = &'static str;
 
     fn try_from(v: u16) -> Result<Self, Self::Error> {
-        match ulnerability::try_from(v) {
+        match Vulnerability::try_from(v) {
             Ok(resistance) => Ok(Self{resistance}),
             Err(e) => Err(e)
         }
@@ -191,7 +191,7 @@ pub fn calculate(
 
 #[cfg(test)]
 mod tests {
-    use crate::{calculate, CalculatedDamage, ElementalVulnerability, RawVulnerability, ulnerability, Sharpness};
+    use crate::{calculate, CalculatedDamage, ElementalVulnerability, RawVulnerability, Vulnerability, Sharpness};
 
     #[test]
     fn test_calculate() {
@@ -200,9 +200,9 @@ mod tests {
             Sharpness::White,
             0,
             25,
-            ulnerability::ThreeStar.into(),
+            Vulnerability::ThreeStar.into(),
             100,
-            ulnerability::ThreeStar.into()
+            Vulnerability::ThreeStar.into()
         ), CalculatedDamage{raw: 92, elemental: 3});
     }
 }
