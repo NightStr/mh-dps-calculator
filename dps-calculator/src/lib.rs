@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fmt::Display;
+use std::convert::TryFrom;
 
 #[derive(Debug)]
 pub enum Sharpness {
@@ -33,6 +34,24 @@ impl Sharpness {
             Self::Blue => 1.0625,
             Self::White => 1.15,
             Self::Purple => 1.25
+        }
+    }
+}
+
+
+impl TryFrom<u16> for Sharpness {
+    type Error = &'static str;
+
+    fn try_from(v: u16) -> Result<Self, Self::Error> {
+        match v {
+            1 => Ok(Self::Red),
+            2 => Ok(Self::Orange),
+            3 => Ok(Self::Yellow),
+            4 => Ok(Self::Green),
+            5 => Ok(Self::Blue),
+            6 => Ok(Self::White),
+            7 => Ok(Self::Purple),
+            _ => Err("Неверное значение для заточки")
         }
     }
 }
@@ -71,6 +90,26 @@ impl From<f32> for RawVulnerability {
     }
 }
 
+impl TryFrom<u16> for RawVulnerability {
+    type Error = &'static str;
+
+    fn try_from(v: u16) -> Result<Self, Self::Error> {
+        match v {
+            1 => Ok(Self{ resistance: Resistance::OneStar }),
+            2 => Ok(Self{ resistance: Resistance::TwoStar }),
+            3 => Ok(Self{ resistance: Resistance::ThreeStar }),
+            v => {
+                match format!("0.{}", v).parse::<f32>() {
+                    Ok(x) => Ok(Self{ resistance: Resistance::Custom(x) }),
+                    Err(_) => {
+                        Err("Некорректное значение. Попробуйте еще раз")
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub struct ElementalVulnerability {
     pub resistance: Resistance
 }
@@ -99,6 +138,25 @@ impl From<f32> for ElementalVulnerability {
     }
 }
 
+impl TryFrom<u16> for ElementalVulnerability {
+    type Error = &'static str;
+
+    fn try_from(v: u16) -> Result<Self, Self::Error> {
+        match v {
+            1 => Ok(Self{ resistance: Resistance::OneStar }),
+            2 => Ok(Self{ resistance: Resistance::TwoStar }),
+            3 => Ok(Self{ resistance: Resistance::ThreeStar }),
+            v => {
+                match format!("0.{}", v).parse::<f32>() {
+                    Ok(x) => Result::Ok(Self{ resistance: Resistance::Custom(x) }),
+                    Err(_) => {
+                        Err("Некорректное значение. Попробуйте еще раз")
+                    }
+                }
+            }
+        }
+    }
+}
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct CalculatedDamage {
