@@ -1,8 +1,9 @@
 use std::fmt;
 use std::fmt::Display;
 use std::convert::TryFrom;
+use std::slice::Iter;
 
-#[derive(Debug)]
+#[derive(Debug, )]
 pub enum Sharpness {
     Red,
     Orange,
